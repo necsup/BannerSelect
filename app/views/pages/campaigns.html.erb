@@ -9,7 +9,7 @@
         <%= "capaign_id: " + params[:campaign_id] %>
 
         <br>
-        <%= simple_format controller.get_banner("phil") %>
+        <%= simple_format controller.get_banner(params[:campaign_id]) %>
         <br>
 
     </div>

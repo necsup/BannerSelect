@@ -5,12 +5,11 @@ class PagesController < ApplicationController
         end
     end
 
-    def get_banner(name)
-        hello_test = "hello, " + name
-        hello_test += " welcome\n"  
+    def get_banner(campaign_id)
     
       
       csv_clicks= CSV.read("app/assets/csv/clicks_1.csv", {encoding: "UTF-8", headers: true, header_converters: :symbol, converters: :all} )
+        hello_test = campaign_id.to_s +  "\n"
 
         hashed_data = csv_clicks.map { |d| d.to_hash }
         hello_test += hashed_data[0][:click_id].to_s + "\n"
