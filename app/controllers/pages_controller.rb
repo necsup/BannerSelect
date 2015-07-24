@@ -7,23 +7,13 @@ class PagesController < ApplicationController
 
     def get_banner(campaign_id)
     
-      
+      hello_test = ""  
       csv_clicks= CSV.read("app/assets/csv/clicks_1.csv", {encoding: "UTF-8", headers: true, header_converters: :symbol, converters: :all} )
       csv_conversions= CSV.read("app/assets/csv/conversions_1.csv", {encoding: "UTF-8", headers: true, header_converters: :symbol, converters: :all} )
-        hello_test = campaign_id.to_s +  "\n"
 
         clicks_data = csv_clicks.map { |d| d.to_hash }
         conversions_data = csv_conversions.map { |d| d.to_hash}
-        hello_test += clicks_data[0][:click_id].to_s + "\n"
-        hello_test += clicks_data[1][:click_id].to_s + "\n"
-        hello_test += clicks_data[2][:click_id].to_s + "\n"
 
-        clicks_data.reverse!
-        hello_test += clicks_data[0][:click_id].to_s + "\n"
-        hello_test += clicks_data[1][:click_id].to_s + "\n"
-        hello_test += clicks_data[2][:click_id].to_s + "\n"
-
-        clicks_data.sort_by! { |v| v[:banner_id]}
         
         #get a subet for only current campaign id
         count = 0;
@@ -48,16 +38,15 @@ class PagesController < ApplicationController
                 if (click[:click_id].to_i == conversion[:click_id].to_i)
                     hello_test += "click generated " + conversion[:revenue].to_s + " on banner " + click[:banner_id].to_s
    
-                            banner_revenue[count] = {:banner_id => click[:banner_id], :revenue => conversion[:revenue]}
-                            if last_banner_id == click[:banner_id]
-                                banner_revenue[count-1][:revenue]  += conversion[:revenue]
-                            else
-                                last_banner_id = click[:banner_id]
-                                count += 1
-                            end
+                    banner_revenue[count] = {:banner_id => click[:banner_id], :revenue => conversion[:revenue]}
+                    if last_banner_id == click[:banner_id]
+                        banner_revenue[count-1][:revenue]  += conversion[:revenue]
+                    else
+                        last_banner_id = click[:banner_id]
+                        count += 1
+                    end
                 end
             end  
-            hello_test += "\n"
         end
 
         #sort by revenue
