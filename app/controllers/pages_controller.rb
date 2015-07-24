@@ -13,7 +13,14 @@ class PagesController < ApplicationController
       csv_clicks= CSV.read("app/assets/csv/clicks_1.csv", {encoding: "UTF-8", headers: true, header_converters: :symbol, converters: :all} )
 
         hashed_data = csv_clicks.map { |d| d.to_hash }
-        hello_test += hashed_data.to_s
+        hello_test += hashed_data[0][:click_id].to_s + "\n"
+        hello_test += hashed_data[1][:click_id].to_s + "\n"
+        hello_test += hashed_data[2][:click_id].to_s + "\n"
+
+        hashed_data.reverse!
+        hello_test += hashed_data[0][:click_id].to_s + "\n"
+        hello_test += hashed_data[1][:click_id].to_s + "\n"
+        hello_test += hashed_data[2][:click_id].to_s
 #            csv_convs = File.read("app/assets/csv/conversions_1.csv")
  #           csv_imps = File.read("app/assets/csv/impressions_1.csv")
 
