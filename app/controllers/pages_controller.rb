@@ -8,6 +8,7 @@ class PagesController < ApplicationController
     def get_banner(campaign_id)
     
       hello_test = ""  
+    
       csv_clicks= CSV.read("app/assets/csv/clicks_1.csv", {encoding: "UTF-8", headers: true, header_converters: :symbol, converters: :all} )
       csv_conversions= CSV.read("app/assets/csv/conversions_1.csv", {encoding: "UTF-8", headers: true, header_converters: :symbol, converters: :all} )
 
@@ -29,6 +30,7 @@ class PagesController < ApplicationController
         #since it sums up the revenues for each banner and checks if last_banner_id == banner_id
 
         clicks_data_subset.sort_by! {|v| v[:banner_id]}
+        hello_test += "\n\n " + clicks_data_subset.to_s + "\n\n"
 
         banner_revenue = Array.new
         count = 0
@@ -38,10 +40,12 @@ class PagesController < ApplicationController
                 if (click[:click_id].to_i == conversion[:click_id].to_i)
                     hello_test += "click generated " + conversion[:revenue].to_s + " on banner " + click[:banner_id].to_s + "\n"
    
-                    banner_revenue[count] = {:banner_id => click[:banner_id], :revenue => conversion[:revenue]}
+        #            banner_revenue[count] = {:banner_id => click[:banner_id], :revenue => conversion[:revenue]}
                     if last_banner_id == click[:banner_id]
                         banner_revenue[count-1][:revenue]  += conversion[:revenue]
                     else
+                                   banner_revenue[count] = {:banner_id => click[:banner_id], :revenue => conversion[:revenue]}
+
                         last_banner_id = click[:banner_id]
                         count += 1
                     end
@@ -54,18 +58,24 @@ class PagesController < ApplicationController
         banner_revenue.reverse!
         hello_test += banner_revenue.to_s
    
-#        banner_to_display = banner_revenue[0][:banner_id]
-#        hello_test += "\n" + banner_to_display.to_s 
-        
+        #Get the top10 banners according to revenue 
         hello_test += "\n number of banners with revenue: " + banner_revenue.size.to_s + "\n" 
         
-        if banner_revenue.size.to_i > 5
+        if banner_revenue.size.to_i > 0
             count = 0
-            while count < 10 && count <= banner_revenue.size.to_i
+            while count < 10 && count < banner_revenue.size.to_i
                 hello_test += "\n" + count.to_s + " banner=" + banner_revenue[count][:banner_id].to_s + " rev=" + banner_revenue[count][:revenue].to_s
                 count += 1
             end
         end    
+
+        count = 0
+        while count < 20
+            random_pos = rand(0..(banner_revenue.size.to_i-1))
+            banner_to_display = banner_revenue[random_pos][:banner_id]
+            hello_test += "\nbanner to display: " + banner_to_display.to_s
+            count += 1
+        end
 
         return hello_test
         return banner_to_display.to_s
