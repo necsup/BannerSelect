@@ -67,16 +67,31 @@ class PagesController < ApplicationController
             end
         end    
 
+        #display random banners while making sure that a banner is not showed twice the same session until all other are shown from that session
         count = 0
         session[:ads_served] = [] #Create a session array for ads served
-        session[:ads_served][0] = 555999
-        session[:ads_served][1] = 111111
-        hello_test += "\n\nsession[:ads_served] " + session[:ads_served].to_s + "\n"
+        random_pos = rand(0..([10, banner_revenue.size.to_i].min.to_i-1)) #initial random banner
         while count < 20
-            random_pos = rand(0..(banner_revenue.size.to_i-1))
+            
+            #check if banner already displayed this session and don't display it again until all ads have been displayed
+            while (random_pos == -1 || (session[:ads_served].include? banner_revenue[random_pos.to_i][:banner_id].to_s)) do 
+                if session[:ads_served].size.to_i == ([10, banner_revenue.size.to_i].min) 
+                    session[:ads_served].clear
+                end
+
+                random_pos = rand(0..([10, banner_revenue.size.to_i].min.to_i-1))   
+
+
+                if session[:ads_served].include? banner_revenue[random_pos.to_i][:banner_id].to_s
+                end
+            end
+
             banner_to_display = banner_revenue[random_pos][:banner_id]
-            hello_test += "\nbanner to display: " + banner_to_display.to_s
+            session[:ads_served][count.to_i%[10, banner_revenue.size.to_i].min.to_i] = banner_to_display.to_s
             count += 1
+
+
+            hello_test += "\nbanner to display: " + banner_to_display.to_s + "  pos[" + random_pos.to_s + "]"
         end
 
         return hello_test
