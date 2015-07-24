@@ -44,7 +44,6 @@ class PagesController < ApplicationController
         count = 0
         last_banner_id = -1
         for click in clicks_data_subset
-#            hello_test += click[:click_id].to_s + " "
             for conversion in conversions_data
                 if (click[:click_id].to_i == conversion[:click_id].to_i)
                     hello_test += "click generated " + conversion[:revenue].to_s + " on banner " + click[:banner_id].to_s
@@ -61,10 +60,14 @@ class PagesController < ApplicationController
             hello_test += "\n"
         end
 
-
+        #sort by revenue
+        banner_revenue.sort_by! {|v| v[:revenue]}
+        banner_revenue.reverse!
         hello_test += banner_revenue.to_s
    
-
-        return hello_test
+        banner_to_display = banner_revenue[0][:banner_id]
+        hello_test += "\n" + banner_to_display.to_s
+       # return hello_test
+         return banner_to_display.to_s
     end
 end
