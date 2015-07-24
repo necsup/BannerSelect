@@ -16,10 +16,25 @@ class PagesController < ApplicationController
         hello_test += hashed_data[1][:click_id].to_s + "\n"
         hello_test += hashed_data[2][:click_id].to_s + "\n"
 
-        hashed_data.reverse!
+#        hashed_data.reverse!
         hello_test += hashed_data[0][:click_id].to_s + "\n"
         hello_test += hashed_data[1][:click_id].to_s + "\n"
-        hello_test += hashed_data[2][:click_id].to_s
+        hello_test += hashed_data[2][:click_id].to_s + "\n"
+
+ #       hello_test += "-----" + campaign_id.to_s + "\n"
+        hello_test += hashed_data.sort_by { |v| v[:campaign_id]}.to_s+ "\n"
+        for campaign in hashed_data
+#            hello_test += "====" + campaign[:campaign_id].to_s + "\n"
+            if campaign[:campaign_id].to_i == campaign_id.to_i
+                hello_test += campaign[:campaign_id].to_s + " " + campaign[:click_id].to_s + " "+ campaign[:banner_id].to_s + "\n"
+
+ #               hello_test += "oaigfhoih"
+            end
+        end
+
+#        for campaign in hashed_data
+ #           hello_test += hashed_data[3][:campaign_id].to_s + "\n"
+  #      end
 #            csv_convs = File.read("app/assets/csv/conversions_1.csv")
  #           csv_imps = File.read("app/assets/csv/impressions_1.csv")
 
