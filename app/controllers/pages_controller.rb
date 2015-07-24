@@ -39,13 +39,11 @@ class PagesController < ApplicationController
             for conversion in conversions_data
                 if (click[:click_id].to_i == conversion[:click_id].to_i)
                     hello_test += "click generated " + conversion[:revenue].to_s + " on banner " + click[:banner_id].to_s + "\n"
-   
-        #            banner_revenue[count] = {:banner_id => click[:banner_id], :revenue => conversion[:revenue]}
+
                     if last_banner_id == click[:banner_id]
                         banner_revenue[count-1][:revenue]  += conversion[:revenue]
                     else
-                                   banner_revenue[count] = {:banner_id => click[:banner_id], :revenue => conversion[:revenue]}
-
+                        banner_revenue[count] = {:banner_id => click[:banner_id], :revenue => conversion[:revenue]}
                         last_banner_id = click[:banner_id]
                         count += 1
                     end
@@ -70,6 +68,10 @@ class PagesController < ApplicationController
         end    
 
         count = 0
+        session[:ads_served] = [] #Create a session array for ads served
+        session[:ads_served][0] = 555999
+        session[:ads_served][1] = 111111
+        hello_test += "\n\nsession[:ads_served] " + session[:ads_served].to_s + "\n"
         while count < 20
             random_pos = rand(0..(banner_revenue.size.to_i-1))
             banner_to_display = banner_revenue[random_pos][:banner_id]
@@ -78,6 +80,6 @@ class PagesController < ApplicationController
         end
 
         return hello_test
-        return banner_to_display.to_s
+#        return banner_to_display.to_s
     end
 end
