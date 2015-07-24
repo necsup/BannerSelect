@@ -1,7 +1,6 @@
 Rails.application.routes.draw do
     get '/campaigns/:campaign_id', to: 'pages#campaigns', as: 'campaign_id' 
 
-#    get '/campaigns/:id', to: 'pages#campaigns'
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
