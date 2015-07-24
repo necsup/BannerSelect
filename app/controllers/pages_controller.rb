@@ -5,21 +5,24 @@ class PagesController < ApplicationController
         end
     end
 
-    def say_hello(name)
+    def get_banner(name)
         hello_test = "hello, " + name
-        hello_test += " welcome"
+        hello_test += " welcome\n"  
     
-            csv_clicks= File.read("app/assets/csv/clicks_1.csv")
-            csv_convs = File.read("app/assets/csv/conversions_1.csv")
-            csv_imps = File.read("app/assets/csv/impressions_1.csv")
+      
+      csv_clicks= CSV.read("app/assets/csv/clicks_1.csv", {encoding: "UTF-8", headers: true, header_converters: :symbol, converters: :all} )
 
-            csv_clicks = CSV.parse(csv_clicks, :headers => true) do |row|
-                hello_test += row.to_s
-            end
+        hashed_data = csv_clicks.map { |d| d.to_hash }
+        hello_test += hashed_data.to_s
+#            csv_convs = File.read("app/assets/csv/conversions_1.csv")
+ #           csv_imps = File.read("app/assets/csv/impressions_1.csv")
 
-            csv_convs =  CSV.parse(csv_convs, :headers => true)
-            csv_imps = CSV.parse(csv_imps, :headers => true)
-#       hello_test += csv_clicks
+      #      csv_clicks = CSV.parse(csv_clicks, :headers => true) do |row|
+     #           hello_test += row.to_s + "\n"
+    #        end
+
+#            csv_convs =  CSV.parse(csv_convs, :headers => true)
+ #           csv_imps = CSV.parse(csv_imps, :headers => true)
         return hello_test
     end
 end
