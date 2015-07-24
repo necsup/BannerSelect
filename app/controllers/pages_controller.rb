@@ -16,34 +16,26 @@ class PagesController < ApplicationController
         hello_test += hashed_data[1][:click_id].to_s + "\n"
         hello_test += hashed_data[2][:click_id].to_s + "\n"
 
-#        hashed_data.reverse!
+        hashed_data.reverse!
         hello_test += hashed_data[0][:click_id].to_s + "\n"
         hello_test += hashed_data[1][:click_id].to_s + "\n"
         hello_test += hashed_data[2][:click_id].to_s + "\n"
 
- #       hello_test += "-----" + campaign_id.to_s + "\n"
-        hello_test += hashed_data.sort_by { |v| v[:campaign_id]}.to_s+ "\n"
+        hashed_data.sort_by! { |v| v[:banner_id]}
+        count = 0;
+        hashed_data2 = Array.new
         for campaign in hashed_data
-#            hello_test += "====" + campaign[:campaign_id].to_s + "\n"
             if campaign[:campaign_id].to_i == campaign_id.to_i
-                hello_test += campaign[:campaign_id].to_s + " " + campaign[:click_id].to_s + " "+ campaign[:banner_id].to_s + "\n"
-
- #               hello_test += "oaigfhoih"
+        #        hello_test += campaign[:campaign_id].to_s + " " + campaign[:click_id].to_s + " "+ campaign[:banner_id].to_s + "\n"
+                hashed_data2[count] = campaign.to_h
+                count += 1
             end
         end
+        hello_test += "---" + hashed_data2[5][:click_id].to_s + "\n"        
+        hashed_data2.sort_by! {|v| v[:banner_id]}
+#        hashed_data2.reverse!
+        hello_test += hashed_data2.to_s 
 
-#        for campaign in hashed_data
- #           hello_test += hashed_data[3][:campaign_id].to_s + "\n"
-  #      end
-#            csv_convs = File.read("app/assets/csv/conversions_1.csv")
- #           csv_imps = File.read("app/assets/csv/impressions_1.csv")
-
-      #      csv_clicks = CSV.parse(csv_clicks, :headers => true) do |row|
-     #           hello_test += row.to_s + "\n"
-    #        end
-
-#            csv_convs =  CSV.parse(csv_convs, :headers => true)
- #           csv_imps = CSV.parse(csv_imps, :headers => true)
         return hello_test
     end
 end
