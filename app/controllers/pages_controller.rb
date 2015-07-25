@@ -70,10 +70,25 @@ class PagesController < ApplicationController
             end
         end    
 
-       #take into account 0 < x <= 5 case, fill it the rest with top clicks
-        if banner_revenue.size.to_i <= 5
+        #if less than 5 entries in top 10
+        banner_click = Array.new
+        if banner_top10.size.to_i <= 5
             debug_str += "\n********\n" + banner_revenue.size.to_s
+            banner_click
         end 
+
+        #if still smaller than 5 after clicks added than fill up with random banners upto 5
+        if banner_revenue.size.to_i == 0
+            count = banner_top10.size.to_i
+            while count < 5          
+                random_banner = rand(100..500)
+                debug_str += "\nrandom banner added banner=" + random_banner.to_s + "\n"
+                banner_top10[count] = {:banner_id => random_banner, :revenue => 0}
+                count += 1
+            end
+        end
+
+       
         
 
 
@@ -84,24 +99,22 @@ class PagesController < ApplicationController
         
         random_pos = -1 
             
-            #check if banner already displayed this session and don't display it again until all ads have been displayed
-            while (random_pos == -1 || (session[:ads_served].include? banner_top10[random_pos.to_i][:banner_id].to_s)) do 
-                if session[:ads_served].size.to_i == ([10, banner_top10.size.to_i].min) 
-                    session[:ads_served].clear
-                end
-
-                random_pos = rand(0..([10, banner_top10.size.to_i].min.to_i-1))   
-
-
-                if session[:ads_served].include? banner_top10[random_pos.to_i][:banner_id].to_s
-                end
+            #clear array if all banners have been shown once or if there are more banners in the session variable due to 
+            #previous run with a different dataset
+            if (session[:ads_served].size.to_i == (banner_top10.size.to_i) || session[:ads_served].size > banner_top10.size)
+                session[:ads_served].clear
+            end
+           
+             #check if banner already displayed this session and don't display it again until all ads have been displayed
+            while (random_pos == -1 || (session[:ads_served].include?(banner_top10[random_pos.to_i][:banner_id].to_s))) do 
+                random_pos = rand(0..(banner_top10.size.to_i.to_i - 1))   
             end
 
             #set the banner to be displayed and add it to the session variable array
             banner_to_display = banner_top10[random_pos][:banner_id]
             count = session[:ads_served].size.to_i
             #debug_str += "\n count = " + session[:ads_served].size.to_s
-            session[:ads_served][count.to_i%[10, banner_top10.size.to_i].min.to_i] = banner_to_display.to_s
+            session[:ads_served][count.to_i%banner_top10.size.to_i] = banner_to_display.to_s
            
 
 
