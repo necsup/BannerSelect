@@ -1,23 +1,17 @@
 <div class="main">
     <div class="container">
-        <%= image_tag "image_#{rand(100..500)}.png.jpg" %>
-        <br>
-        <%= "controller_name: " + controller_name %>
-        <br>
-        <%= "action_name: " + action_name %>
-        <br>
-        <%= "capaign_id: " + params[:campaign_id] %>
+        <%#= image_tag "image_#{rand(100..500)}.png.jpg" %>
+        <%#= "controller_name: " + controller_name %>
+        <%#= "action_name: " + action_name %>
+        <%#= "capaign_id: " + params[:campaign_id] %>
 
         <br>
         <%#= simple_format controller.get_banner(params[:campaign_id]) %>
+        <%= simple_format controller.get_banner(params[:campaign_id]) %>
+        <%= simple_format controller.get_banner(params[:campaign_id]) %>
+        <%= simple_format controller.get_banner(params[:campaign_id]) %>
+        <%= simple_format controller.get_banner(params[:campaign_id]) %>
         <br>
-        <%= image_tag "image_#{controller.get_banner(params[:campaign_id])}.png.jpg" %>
-        <%= image_tag "image_#{controller.get_banner(params[:campaign_id])}.png.jpg" %>
-        <%= image_tag "image_#{controller.get_banner(params[:campaign_id])}.png.jpg" %>
-        <%= image_tag "image_#{controller.get_banner(params[:campaign_id])}.png.jpg" %>
-        <%= image_tag "image_#{controller.get_banner(params[:campaign_id])}.png.jpg" %>
-        <%= image_tag "image_#{controller.get_banner(params[:campaign_id])}.png.jpg" %>
-        <%= image_tag "image_#{controller.get_banner(params[:campaign_id])}.png.jpg" %>
-
+        <%#= image_tag "image_#{controller.get_banner(params[:campaign_id])}.png.jpg" %>
     </div>
 </div>

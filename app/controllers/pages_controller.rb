@@ -7,7 +7,7 @@ class PagesController < ApplicationController
 
     def get_banner(campaign_id)
     
-      #debug_str = ""  
+      debug_str = ""  
     
       csv_clicks= CSV.read("app/assets/csv/clicks_1.csv", {encoding: "UTF-8", headers: true, header_converters: :symbol, converters: :all} )
       csv_conversions= CSV.read("app/assets/csv/conversions_1.csv", {encoding: "UTF-8", headers: true, header_converters: :symbol, converters: :all} )
@@ -58,53 +58,64 @@ class PagesController < ApplicationController
    
         #Get the top10 banners according to revenue 
         #debug_str += "\n number of banners with revenue: " + banner_revenue.size.to_s + "\n" 
+
+        banner_top10 = Array.new
         
         if banner_revenue.size.to_i > 0
             count = 0
             while count < 10 && count < banner_revenue.size.to_i
-                #debug_str += "\n" + count.to_s + " banner=" + banner_revenue[count][:banner_id].to_s + " rev=" + banner_revenue[count][:revenue].to_s
+                debug_str += "\n" + count.to_s + " banner=" + banner_revenue[count][:banner_id].to_s + " rev=" + banner_revenue[count][:revenue].to_s
+                banner_top10[count] = {:banner_id => banner_revenue[count][:banner_id], :revenue => banner_revenue[count][:revenue]}
                 count += 1
             end
         end    
 
-        
+       #take into account 0 < x <= 5 case, fill it the rest with top clicks
+        if banner_revenue.size.to_i <= 5
+            debug_str += "\n********\n" + banner_revenue.size.to_s
+        end 
         
 
-        #debug_str += "\nsession[:ads_served] = " + session[:ads_served].to_s + "\n"
-        #debug_str += "size = " + session[:ads_served].size.to_s + "\n"
 
-        #display random banners while making sure that a banner is not showed twice the same session until all other are shown from that session
+       #display random banners while making sure that a banner is not showed twice the same session until all other are shown from that session
        #if session[:ads_server]  ||= false #||= session[:ads_server].nil 
             session[:ads_served] ||= [] #Create a session array for ads served
        #end
         
-        random_pos = -1 #rand(0..([10, banner_revenue.size.to_i].min.to_i-1)) #initial random banner
+        random_pos = -1 
             
             #check if banner already displayed this session and don't display it again until all ads have been displayed
-            while (random_pos == -1 || (session[:ads_served].include? banner_revenue[random_pos.to_i][:banner_id].to_s)) do 
-                if session[:ads_served].size.to_i == ([10, banner_revenue.size.to_i].min) 
+            while (random_pos == -1 || (session[:ads_served].include? banner_top10[random_pos.to_i][:banner_id].to_s)) do 
+                if session[:ads_served].size.to_i == ([10, banner_top10.size.to_i].min) 
                     session[:ads_served].clear
                 end
 
-                random_pos = rand(0..([10, banner_revenue.size.to_i].min.to_i-1))   
+                random_pos = rand(0..([10, banner_top10.size.to_i].min.to_i-1))   
 
 
-                if session[:ads_served].include? banner_revenue[random_pos.to_i][:banner_id].to_s
+                if session[:ads_served].include? banner_top10[random_pos.to_i][:banner_id].to_s
                 end
             end
 
-            banner_to_display = banner_revenue[random_pos][:banner_id]
+            #set the banner to be displayed and add it to the session variable array
+            banner_to_display = banner_top10[random_pos][:banner_id]
             count = session[:ads_served].size.to_i
             #debug_str += "\n count = " + session[:ads_served].size.to_s
-            session[:ads_served][count.to_i%[10, banner_revenue.size.to_i].min.to_i] = banner_to_display.to_s
+            session[:ads_served][count.to_i%[10, banner_top10.size.to_i].min.to_i] = banner_to_display.to_s
            
 
 
 
-            #debug_str += "\nbanner to display: " + banner_to_display.to_s + "  pos[" + random_pos.to_s + "]"
-        #debug_str += "\nsession[:ads_served] = " + session[:ads_served].to_s + " size=" + session[:ads_served].size.to_s + "\n"
+        debug_str += "\nbanner to display: " + banner_to_display.to_s + "  pos[" + random_pos.to_s + "]"
+        debug_str += "\nsession[:ads_served] = " + session[:ads_served].to_s + " size=" + session[:ads_served].size.to_s + "\n"
 
-#        return #debug_str
+        debug_str += "\n --- top10 --- \n" #+ banner_top10.to_s
+        for banner in banner_top10
+            debug_str += banner.to_s + "\n"
+        end
+        debug_str += "-------------------------------------------\n"   
+
+        return debug_str
         return banner_to_display.to_s
     end
 end
