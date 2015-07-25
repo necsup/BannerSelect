@@ -77,7 +77,6 @@ class PagesController < ApplicationController
         #sort by revenue
         banner_revenue.sort_by! {|v| v[:revenue]}
         banner_revenue.reverse!
-        #debug_str += banner_revenue.to_s
    
         #Get the top10 banners according to revenue 
         #debug_str += "\n number of banners with revenue: " + banner_revenue.size.to_s + "\n" 
@@ -99,7 +98,15 @@ class PagesController < ApplicationController
             place = banner_top10.size.to_i
             count = 0
             while place < 5 && place <banner_clicks.size.to_i
-                debug_str += "\n********\n" + banner_revenue.size.to_s
+
+                i = 0
+                while  i < banner_top10.size.to_i
+                    if banner_top10[i][:banner_id].to_s == banner_clicks[count][:banner_id].to_s
+                        count += 1
+                    end
+                    i += 1
+                end
+
                 banner_top10[place] = {:banner_id => banner_clicks[count][:banner_id], :revenue => 0}
                 place += 1
                 count += 1
@@ -157,7 +164,7 @@ class PagesController < ApplicationController
         end
         debug_str += "-------------------------------------------\n"   
 
-        return debug_str
+       # return debug_str
         return banner_to_display.to_s
     end
 end
