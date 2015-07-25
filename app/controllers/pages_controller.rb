@@ -32,6 +32,7 @@ class PagesController < ApplicationController
         clicks_data_subset.sort_by! {|v| v[:banner_id]}
         #debug_str += "\n\n " + clicks_data_subset.to_s + "\n\n"
 
+        #calculate banner revenue and click array
         banner_revenue = Array.new
         count = 0
         last_banner_id = -1
@@ -39,7 +40,7 @@ class PagesController < ApplicationController
             for conversion in conversions_data
                 if (click[:click_id].to_i == conversion[:click_id].to_i)
                     #debug_str += "click generated " + conversion[:revenue].to_s + " on banner " + click[:banner_id].to_s + "\n"
-
+                    
                     if last_banner_id == click[:banner_id]
                         banner_revenue[count-1][:revenue]  += conversion[:revenue]
                     else
@@ -50,6 +51,28 @@ class PagesController < ApplicationController
                 end
             end  
         end
+
+        #calculate and collect clicks
+        banner_clicks = Array.new
+        count = 0
+        last_banner_id = -1
+        for click in clicks_data_subset
+            if last_banner_id == click[:banner_id]
+                banner_clicks[count-1][:clicks] += 1
+            else
+                banner_clicks[count] = {:banner_id => click[:banner_id], :clicks => 1}
+                last_banner_id = click[:banner_id]
+                count += 1
+           end
+        end
+
+
+        #sort click data by click
+        banner_clicks.sort_by! {|v| v[:clicks]}
+        banner_clicks.reverse!
+        debug_str += "\n ----" +  banner_clicks.to_s + "---- \n"
+
+        
 
         #sort by revenue
         banner_revenue.sort_by! {|v| v[:revenue]}
@@ -71,10 +94,16 @@ class PagesController < ApplicationController
         end    
 
         #if less than 5 entries in top 10
-        banner_click = Array.new
-        if banner_top10.size.to_i <= 5
-            debug_str += "\n********\n" + banner_revenue.size.to_s
-            banner_click
+        
+        if banner_top10.size.to_i < 5
+            place = banner_top10.size.to_i
+            count = 0
+            while place < 5 && place <banner_clicks.size.to_i
+                debug_str += "\n********\n" + banner_revenue.size.to_s
+                banner_top10[place] = {:banner_id => banner_clicks[count][:banner_id], :revenue => 0}
+                place += 1
+                count += 1
+            end
         end 
 
         #if still smaller than 5 after clicks added than fill up with random banners upto 5
