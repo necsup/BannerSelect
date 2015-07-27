@@ -2,10 +2,10 @@
 
 
 * Versions used:
-ruby 2.2.2p95 (2015-04-13 revision 50295) [x86_64-linux]
-Rails 4.2.3
-rvm 1.26.11
-gem 2.4.8
+-ruby 2.2.2p95 (2015-04-13 revision 50295) [x86_64-linux]
+-Rails 4.2.3
+-rvm 1.26.11
+-gem 2.4.8
 
 * To install and run
 
