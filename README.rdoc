@@ -65,11 +65,11 @@ Two extra datasets (clicks_1.csv.test and clicks_1.csv.test2) are included.
 -Some notes about the requirements
     -If there are 5,6,7,8,or 9 in banner_toplist (n=5..9), there won't ever be any banner that hasn't generated revenue at some point, so they will never grow in size.
     -The random banner list isn't saved, so the 5 banners in the banner_toplist are regenerated every time the page is refreshed.
-    -It is not specified whether, in the case of (0<x<=5), the banner_toplist should include random banners to fill it up. The solution provided follows wat the requirments specifies.
-    -Impressions.csv wasn't used. A random number betweem 100..500 is used to for the random banners. It is not clear if thie file should be used instead to decide which random banner to display.
+    -It is not specified whether, in the case of (0<x<=5), the banner_toplist should include random banners to fill it up. The solution provided follows what the requirements specifies.
+    -Impressions.csv wasn't used. A random number between 100..500 is used to for the random banners. It is not clear if this file should be used instead to decide which random banner to display.
 
-    -Loading CSV files is very time consuming on my machine (about 6 seconds to load clicks.csv and conversions.csv). Loading the data once into a persistant storage, such as a database would greatly increase the speed and also allow for it to be updated easily. Storing the data in a database, especially if already sorted, will greatly speed up the execution time.
-    -It is assumed that, although not explicity specified in the document, that in the (0<x<=5) case where the top_bannerlist consists of banners with clicks and banners with revenue, that it is not wanted to have duplicates. Therefore, the program checks and skips to the banner with the next highest amount of clicks if the banner is already amongst in banner_toplist.
+    -Loading CSV files is very time consuming on my machine (about 6 seconds to load clicks.csv and conversions.csv). Loading the data once into a persistent storage, such as a database would greatly increase the speed and also allow for it to be updated easily. Storing the data in a database, especially if already sorted, will greatly speed up the execution time.
+    -It is assumed that, although not explicitly specified in the document, that in the (0<x<=5) case where the top_bannerlist consists of banners with clicks and banners with revenue, that it is not wanted to have duplicates. Therefore, the program checks and skips to the banner with the next highest amount of clicks if the banner is already amongst in banner_toplist.
 
 
 * Approach used
