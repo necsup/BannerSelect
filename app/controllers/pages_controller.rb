@@ -7,16 +7,64 @@ class PagesController < ApplicationController
 
     def get_banner(campaign_id)
     
-      debug_str = ""  
-    
-      csv_clicks= CSV.read("app/assets/csv/clicks_1.csv", {encoding: "UTF-8", headers: true, header_converters: :symbol, converters: :all} )
-      csv_conversions= CSV.read("app/assets/csv/conversions_1.csv", {encoding: "UTF-8", headers: true, header_converters: :symbol, converters: :all} )
+        $debug_str = ""  
 
-        clicks_data = csv_clicks.map { |d| d.to_hash }
+        #Load csv files
+        clicks_data = load_clicks_csv_file
+        conversions_data = load_converions_csv_file
+
+        #get a subet for only current campaign id
+        clicks_data_subset = get_clicks_by_campaign_id(clicks_data, campaign_id)
+
+        #get banners with revenue 
+        banner_revenue = get_banners_with_revenue(clicks_data_subset, conversions_data)
+
+        #calculate and collect clicks
+        banner_clicks = get_banners_clicks(clicks_data_subset)
+
+        #sort revenue data by revenue amount
+        banner_revenue.sort_by! {|v| v[:revenue]}
+        banner_revenue.reverse!
+
+        #sort click data by click number
+        banner_clicks.sort_by! {|v| v[:clicks]}
+        banner_clicks.reverse!
+        
+        #Get the top10 banners according to revenue 
+        banner_top10 = get_banner_top10(banner_revenue, banner_clicks)
+
+        #Get banner to display
+        banner_to_display = get_banner_to_display(banner_top10)
+        
+        $debug_str += "\nbanner to display: " + banner_to_display.to_s 
+        $debug_str += "\nsession[:ads_served] = " + session[:ads_served].to_s + " size=" + session[:ads_served].size.to_s + "\n"
+
+        $debug_str += "\n --- top10 --- \n" #+ banner_top10.to_s
+        for banner in banner_top10
+            $debug_str += banner.to_s + "\n"
+        end
+        $debug_str += "-------------------------------------------\n"   
+
+       # return $debug_str
+        return banner_to_display.to_s
+    end
+
+    def load_converions_csv_file
+        csv_conversions= CSV.read("app/assets/csv/conversions_1.csv", {encoding: "UTF-8", headers: true, header_converters: :symbol, converters: :all} )
         conversions_data = csv_conversions.map { |d| d.to_hash}
 
+        return conversions_data
+    end
+
+
+    def load_clicks_csv_file
+        csv_clicks= CSV.read("app/assets/csv/clicks_1.csv", {encoding: "UTF-8", headers: true, header_converters: :symbol, converters: :all} )
+        clicks_data = csv_clicks.map { |d| d.to_hash }
         
-        #get a subet for only current campaign id
+        return clicks_data
+    end
+
+    def get_clicks_by_campaign_id(clicks_data, campaign_id)
         count = 0;
         clicks_data_subset = Array.new
         for click in clicks_data
@@ -25,12 +73,16 @@ class PagesController < ApplicationController
                 count += 1
             end
         end
+        return clicks_data_subset
+    end
 
+    def get_banners_with_revenue(clicks_data_subset, conversions_data)
+        
         #banners with conversions, note that the clicks have to be sorted according to banner_id for this block
         #since it sums up the revenues for each banner and checks if last_banner_id == banner_id
-
+        
         clicks_data_subset.sort_by! {|v| v[:banner_id]}
-        #debug_str += "\n\n " + clicks_data_subset.to_s + "\n\n"
+        #$debug_str += "\n\n " + clicks_data_subset.to_s + "\n\n"
 
         #calculate banner revenue and click array
         banner_revenue = Array.new
@@ -39,7 +91,7 @@ class PagesController < ApplicationController
         for click in clicks_data_subset
             for conversion in conversions_data
                 if (click[:click_id].to_i == conversion[:click_id].to_i)
-                    #debug_str += "click generated " + conversion[:revenue].to_s + " on banner " + click[:banner_id].to_s + "\n"
+                    #$debug_str += "click generated " + conversion[:revenue].to_s + " on banner " + click[:banner_id].to_s + "\n"
                     
                     if last_banner_id == click[:banner_id]
                         banner_revenue[count-1][:revenue]  += conversion[:revenue]
@@ -51,8 +103,10 @@ class PagesController < ApplicationController
                 end
             end  
         end
+        return banner_revenue
+    end
 
-        #calculate and collect clicks
+    def get_banners_clicks(clicks_data_subset)
         banner_clicks = Array.new
         count = 0
         last_banner_id = -1
@@ -65,28 +119,16 @@ class PagesController < ApplicationController
                 count += 1
            end
         end
+        return banner_clicks
+    end
 
-
-        #sort click data by click
-        banner_clicks.sort_by! {|v| v[:clicks]}
-        banner_clicks.reverse!
-        debug_str += "\n ----" +  banner_clicks.to_s + "---- \n"
-
-        
-
-        #sort by revenue
-        banner_revenue.sort_by! {|v| v[:revenue]}
-        banner_revenue.reverse!
-   
-        #Get the top10 banners according to revenue 
-        #debug_str += "\n number of banners with revenue: " + banner_revenue.size.to_s + "\n" 
-
+    def get_banner_top10(banner_revenue, banner_clicks)
         banner_top10 = Array.new
         
         if banner_revenue.size.to_i > 0
             count = 0
             while count < 10 && count < banner_revenue.size.to_i
-                debug_str += "\n" + count.to_s + " banner=" + banner_revenue[count][:banner_id].to_s + " rev=" + banner_revenue[count][:revenue].to_s
+                $debug_str += count.to_s + " banner=" + banner_revenue[count][:banner_id].to_s + " rev=" + banner_revenue[count][:revenue].to_s + "\n"
                 banner_top10[count] = {:banner_id => banner_revenue[count][:banner_id], :revenue => banner_revenue[count][:revenue]}
                 count += 1
             end
@@ -118,53 +160,37 @@ class PagesController < ApplicationController
             count = banner_top10.size.to_i
             while count < 5          
                 random_banner = rand(100..500)
-                debug_str += "\nrandom banner added banner=" + random_banner.to_s + "\n"
+                $debug_str += "\nrandom banner added banner=" + random_banner.to_s + "\n"
                 banner_top10[count] = {:banner_id => random_banner, :revenue => 0}
                 count += 1
             end
         end
+        return banner_top10
+    end
 
-       
-        
-
-
-       #display random banners while making sure that a banner is not showed twice the same session until all other are shown from that session
-       #if session[:ads_server]  ||= false #||= session[:ads_server].nil 
-            session[:ads_served] ||= [] #Create a session array for ads served
-       #end
+    def get_banner_to_display(banner_top10)
+        #display random banners while making sure that a banner is not showed twice the same session until all other are shown from that session
+        session[:ads_served] ||= [] #Create a session array for ads served
         
         random_pos = -1 
             
-            #clear array if all banners have been shown once or if there are more banners in the session variable due to 
-            #previous run with a different dataset
-            if (session[:ads_served].size.to_i == (banner_top10.size.to_i) || session[:ads_served].size > banner_top10.size)
-                session[:ads_served].clear
-            end
-           
-             #check if banner already displayed this session and don't display it again until all ads have been displayed
-            while (random_pos == -1 || (session[:ads_served].include?(banner_top10[random_pos.to_i][:banner_id].to_s))) do 
-                random_pos = rand(0..(banner_top10.size.to_i.to_i - 1))   
-            end
-
-            #set the banner to be displayed and add it to the session variable array
-            banner_to_display = banner_top10[random_pos][:banner_id]
-            count = session[:ads_served].size.to_i
-            #debug_str += "\n count = " + session[:ads_served].size.to_s
-            session[:ads_served][count.to_i%banner_top10.size.to_i] = banner_to_display.to_s
-           
-
-
-
-        debug_str += "\nbanner to display: " + banner_to_display.to_s + "  pos[" + random_pos.to_s + "]"
-        debug_str += "\nsession[:ads_served] = " + session[:ads_served].to_s + " size=" + session[:ads_served].size.to_s + "\n"
-
-        debug_str += "\n --- top10 --- \n" #+ banner_top10.to_s
-        for banner in banner_top10
-            debug_str += banner.to_s + "\n"
+        #clear array if all banners have been shown once or if there are more banners in the session variable due to 
+        #previous run with a different dataset
+        if (session[:ads_served].size.to_i == (banner_top10.size.to_i) || session[:ads_served].size > banner_top10.size)
+            session[:ads_served].clear
         end
-        debug_str += "-------------------------------------------\n"   
+           
+        #check if banner already displayed this session and don't display it again until all ads have been displayed
+        while (random_pos == -1 || (session[:ads_served].include?(banner_top10[random_pos.to_i][:banner_id].to_s))) do 
+            random_pos = rand(0..(banner_top10.size.to_i.to_i - 1))   
+        end
 
-       # return debug_str
-        return banner_to_display.to_s
+        #set the banner to be displayed and add it to the session variable array
+        banner_to_display = banner_top10[random_pos][:banner_id]
+        count = session[:ads_served].size.to_i
+        #$debug_str += "\n count = " + session[:ads_served].size.to_s
+        session[:ads_served][count.to_i%banner_top10.size.to_i] = banner_to_display.to_s
+        
+        return banner_to_display
     end
 end
