@@ -37,7 +37,7 @@ class PagesController < ApplicationController
         end
         $debug_str += "-------------------------------------------\n"   
 
-        return $debug_str
+#        return $debug_str
         return banner_to_display.to_s
     end
 
