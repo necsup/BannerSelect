@@ -19,16 +19,8 @@ class PagesController < ApplicationController
         #get banners with revenue 
         banner_revenue = get_banners_with_revenue(clicks_data_subset, conversions_data)
 
-        #calculate and collect clicks
+        #calculate and calculate clicks
         banner_clicks = get_banners_clicks(clicks_data_subset)
-
-        #sort revenue data by revenue amount
-        banner_revenue.sort_by! {|v| v[:revenue]}
-        banner_revenue.reverse!
-
-        #sort click data by click number
-        banner_clicks.sort_by! {|v| v[:clicks]}
-        banner_clicks.reverse!
         
         #Get the top10 banners according to revenue 
         banner_top10 = get_banner_top10(banner_revenue, banner_clicks)
@@ -45,7 +37,7 @@ class PagesController < ApplicationController
         end
         $debug_str += "-------------------------------------------\n"   
 
-       # return $debug_str
+        return $debug_str
         return banner_to_display.to_s
     end
 
@@ -125,6 +117,14 @@ class PagesController < ApplicationController
     def get_banner_top10(banner_revenue, banner_clicks)
         banner_top10 = Array.new
         
+        #sort revenue data by revenue amount
+        banner_revenue.sort_by! {|v| v[:revenue]}
+        banner_revenue.reverse!
+
+        #sort click data by click number
+        banner_clicks.sort_by! {|v| v[:clicks]}
+        banner_clicks.reverse!
+        
         if banner_revenue.size.to_i > 0
             count = 0
             while count < 10 && count < banner_revenue.size.to_i
@@ -168,8 +168,8 @@ class PagesController < ApplicationController
         return banner_top10
     end
 
+    #display random banners while making sure that a banner is not showed twice the same session until all other are shown from that session
     def get_banner_to_display(banner_top10)
-        #display random banners while making sure that a banner is not showed twice the same session until all other are shown from that session
         session[:ads_served] ||= [] #Create a session array for ads served
         
         random_pos = -1 
