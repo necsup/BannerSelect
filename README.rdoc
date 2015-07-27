@@ -1,28 +1,90 @@
 == README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
 
-Things you may want to cover:
+* Versions used:
+ruby 2.2.2p95 (2015-04-13 revision 50295) [x86_64-linux]
+Rails 4.2.3
+rvm 1.26.11
+gem 2.4.8
 
-* Ruby version
+* To install and run
 
-* System dependencies
+Download from: https://github.com/necsup/BannerSelect/tree/master
 
-* Configuration
+-Install RVM
+    $ \curl -L https://get.rvm.io | bash -s stable --ruby
+-Install Node.js
+    $ sudo apt-get install nodejs
+-Update gems
+    $ gem update
+-Install Bundler and Nokogiri
+    $ gem install bundler
+    $ gem install nokogiri
+-Make gemset for current stable release
+    $ rvm use ruby-2.2.2@rails4.2 --create
+-Install latest rails release
+    $ gem install rails
 
-* Database creation
+(this procedure is from: http://railsapps.github.io/installrubyonrails-ubuntu.html)
 
-* Database initialization
+-Unzip files
+-Start the rails server
+    Inside the bannerServe directory
+    $ rails server    
+-View banner
+    Inside web browser, go to:
+    http://localhost:3000/campaigns/"campaign_id" where campaign is the number of the campaign
+    ex:
+        http://localhost:3000/campaigns/1
+        http://localhost:3000/campaigns/22
+        http://localhost:3000/campaigns/100 (this is an empty campaign, so 5 random banners are generated instead for top_bannerlist, x==0)
+-To stop the server, push ctrl-c inside the window the rails server is running in, or just close that window.
 
-* How to run the test suite
+Two extra datasets (clicks_1.csv.test and clicks_1.csv.test2) are included. 
+    -clicks_1.csv.test will, for campaign_id=1, give 3 banners with revenue, populating the rest of the top5 according to clicks
+    -clicks_1.csv.test2 will, for campaign_id=1  give 6 banners with revenue, showing what happens for the (5<x<=10) case.
+    -clicks_1.csv.orig is the original dataset  
+    To change the dataset used, go to the bannerServe/app/assets/csv/ directory and copy the desired dataset to clicks_1.csv.
+        eg: 
+            $ cp clicks_1.csv.test clicks_1.csv
 
-* Services (job queues, cache servers, search engines, etc.)
+* Notes
 
-* Deployment instructions
+-To show some debugging information:
+    In /bannerServe/app/views/pages/campaigns.html.erb switch what is displayed
+        <%#= simple_format controller.get_banner(params[:campaign_id]) %>
+    to: <%= simple_format controller.get_banner(params[:campaign_id]) %>
+    and
+        <%= image_tag "image_#{controller.get_banner(params[:campaign_id])}.png.jpg" %>
+    to: <%#= image_tag "image_#{controller.get_banner(params[:campaign_id])}.png.jpg" %>
 
-* ...
+    In /bannerServe/app/controllers/pages_controller.rb return the $debug_str (uncomment the line)
+        #        return $debug_str
+    to:          return $debug_str
+
+-Some notes about the requirements
+    -If there are 5,6,7,8,or 9 in banner_toplist (n=5..9), there won't ever be any banner that hasn't generated revenue at some point, so they will never grow in size.
+    -The random banner list isn't saved, so the 5 banners in the banner_toplist are regenerated every time the page is refreshed.
+    -It is not specified whether, in the case of (0<x<=5), the banner_toplist should include random banners to fill it up. The solution provided follows wat the requirments specifies.
+    -Impressions.csv wasn't used. A random number betweem 100..500 is used to for the random banners. It is not clear if thie file should be used instead to decide which random banner to display.
+
+    -Loading CSV files is very time consuming on my machine (about 6 seconds to load clicks.csv and conversions.csv). Loading the data once into a persistant storage, such as a database would greatly increase the speed and also allow for it to be updated easily. Storing the data in a database, especially if already sorted, will greatly speed up the execution time.
+    -It is assumed that, although not explicity specified in the document, that in the (0<x<=5) case where the top_bannerlist consists of banners with clicks and banners with revenue, that it is not wanted to have duplicates. Therefore, the program checks and skips to the banner with the next highest amount of clicks if the banner is already amongst in banner_toplist.
 
 
-Please feel free to use a different markup language if you do not plan to run
+* Approach used
+    
+    -Overview
+        - The program starts by loading the csv files into hash tables
+        - Gets a subset of clicks_data of the clicks for the requested campaign_id
+        - Gets all the banners which at least one conversion, along with their total revenue (sum of revenues for each conversion)
+        - Calculates the number of clicks for each banner
+        - Gets the banner_toplist
+        - Gets the banner to display according to the requirements. The banner to display is returned as its banner_id number. The page view (campaigns.html.erb) constructs the full filename for the image.
+
+    -the built in sort algorithm was used
+    -the built in CSV reading is used.
+
+
+
 <tt>rake doc:app</tt>.

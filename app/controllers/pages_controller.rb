@@ -23,16 +23,16 @@ class PagesController < ApplicationController
         banner_clicks = get_banners_clicks(clicks_data_subset)
         
         #Get the top10 banners according to revenue 
-        banner_top10 = get_banner_top10(banner_revenue, banner_clicks)
+        banner_toplist = get_banner_toplist(banner_revenue, banner_clicks)
 
         #Get banner to display
-        banner_to_display = get_banner_to_display(banner_top10)
+        banner_to_display = get_banner_to_display(banner_toplist)
         
         $debug_str += "\nbanner to display: " + banner_to_display.to_s 
         $debug_str += "\nsession[:ads_served] = " + session[:ads_served].to_s + " size=" + session[:ads_served].size.to_s + "\n"
 
-        $debug_str += "\n --- top10 --- \n" #+ banner_top10.to_s
-        for banner in banner_top10
+        $debug_str += "\n --- top10 --- \n" #+ banner_toplist.to_s
+        for banner in banner_toplist
             $debug_str += banner.to_s + "\n"
         end
         $debug_str += "-------------------------------------------\n"   
@@ -114,8 +114,8 @@ class PagesController < ApplicationController
         return banner_clicks
     end
 
-    def get_banner_top10(banner_revenue, banner_clicks)
-        banner_top10 = Array.new
+    def get_banner_toplist(banner_revenue, banner_clicks)
+        banner_toplist = Array.new
         
         #sort revenue data by revenue amount
         banner_revenue.sort_by! {|v| v[:revenue]}
@@ -129,27 +129,27 @@ class PagesController < ApplicationController
             count = 0
             while count < 10 && count < banner_revenue.size.to_i
                 $debug_str += count.to_s + " banner=" + banner_revenue[count][:banner_id].to_s + " rev=" + banner_revenue[count][:revenue].to_s + "\n"
-                banner_top10[count] = {:banner_id => banner_revenue[count][:banner_id], :revenue => banner_revenue[count][:revenue]}
+                banner_toplist[count] = {:banner_id => banner_revenue[count][:banner_id], :revenue => banner_revenue[count][:revenue]}
                 count += 1
             end
         end    
 
         #if less than 5 entries in top 10
         
-        if banner_top10.size.to_i < 5
-            place = banner_top10.size.to_i
+        if banner_toplist.size.to_i < 5
+            place = banner_toplist.size.to_i
             count = 0
             while place < 5 && place <banner_clicks.size.to_i
 
                 i = 0
-                while  i < banner_top10.size.to_i
-                    if banner_top10[i][:banner_id].to_s == banner_clicks[count][:banner_id].to_s
+                while  i < banner_toplist.size.to_i
+                    if banner_toplist[i][:banner_id].to_s == banner_clicks[count][:banner_id].to_s
                         count += 1
                     end
                     i += 1
                 end
 
-                banner_top10[place] = {:banner_id => banner_clicks[count][:banner_id], :revenue => 0}
+                banner_toplist[place] = {:banner_id => banner_clicks[count][:banner_id], :revenue => 0}
                 place += 1
                 count += 1
             end
@@ -157,39 +157,39 @@ class PagesController < ApplicationController
 
         #if still smaller than 5 after clicks added than fill up with random banners upto 5
         if banner_revenue.size.to_i == 0
-            count = banner_top10.size.to_i
+            count = banner_toplist.size.to_i
             while count < 5          
                 random_banner = rand(100..500)
                 $debug_str += "\nrandom banner added banner=" + random_banner.to_s + "\n"
-                banner_top10[count] = {:banner_id => random_banner, :revenue => 0}
+                banner_toplist[count] = {:banner_id => random_banner, :revenue => 0}
                 count += 1
             end
         end
-        return banner_top10
+        return banner_toplist
     end
 
     #display random banners while making sure that a banner is not showed twice the same session until all other are shown from that session
-    def get_banner_to_display(banner_top10)
+    def get_banner_to_display(banner_toplist)
         session[:ads_served] ||= [] #Create a session array for ads served
         
         random_pos = -1 
             
         #clear array if all banners have been shown once or if there are more banners in the session variable due to 
         #previous run with a different dataset
-        if (session[:ads_served].size.to_i == (banner_top10.size.to_i) || session[:ads_served].size > banner_top10.size)
+        if (session[:ads_served].size.to_i == (banner_toplist.size.to_i) || session[:ads_served].size > banner_toplist.size)
             session[:ads_served].clear
         end
            
         #check if banner already displayed this session and don't display it again until all ads have been displayed
-        while (random_pos == -1 || (session[:ads_served].include?(banner_top10[random_pos.to_i][:banner_id].to_s))) do 
-            random_pos = rand(0..(banner_top10.size.to_i.to_i - 1))   
+        while (random_pos == -1 || (session[:ads_served].include?(banner_toplist[random_pos.to_i][:banner_id].to_s))) do 
+            random_pos = rand(0..(banner_toplist.size.to_i.to_i - 1))   
         end
 
         #set the banner to be displayed and add it to the session variable array
-        banner_to_display = banner_top10[random_pos][:banner_id]
+        banner_to_display = banner_toplist[random_pos][:banner_id]
         count = session[:ads_served].size.to_i
         #$debug_str += "\n count = " + session[:ads_served].size.to_s
-        session[:ads_served][count.to_i%banner_top10.size.to_i] = banner_to_display.to_s
+        session[:ads_served][count.to_i%banner_toplist.size.to_i] = banner_to_display.to_s
         
         return banner_to_display
     end
